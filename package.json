@@ -1,0 +1,27 @@
+{
+  "name": "salesforce",
+  "version": "1.0.0",
+  "description": "Salesforce Connector for Komea Dashboard",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "democli": "index.js"
+  },
+  "keywords": [
+    "node",
+    "cli",
+    "salesforce",
+    "komea",
+    "dashboard",
+    "echoes"
+  ],
+  "author": "Sylvain Leroy",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "jsforce": "^1.7.0",
+    "winston": "^2.2.0"
+  }
+}
