@@ -7,9 +7,7 @@
 const program = require('commander');
 const logger = require('winston');
 const jsforce = require('jsforce');
-//PU8ohuuoOJ7fuUHmKFQRH09z
-//login sylvain.leroy@metrixware.com
-//token WP-y@5YmsalesforcePU8ohuuoOJ7fuUHmKFQRH09z
+
 
 program
     .version('1.0.0')
