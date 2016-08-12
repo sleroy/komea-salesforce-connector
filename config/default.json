@@ -3,7 +3,9 @@
     "sonar": {
         "host": "zeus.tocea.local",
         "port": 9000,
-        "https": true
+        "https": false,
+        "login" : "admin",
+        "password": "admin",
     },
     "komea": {
         "storage_url": "http://dashboard.metrixware.local:8090",
