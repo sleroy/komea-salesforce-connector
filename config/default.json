@@ -1,0 +1,15 @@
+{
+    // Sonar REST connection configuration
+    "sonar": {
+        "host": "zeus.tocea.local",
+        "port": 9000,
+        "https": true
+    },
+    "komea": {
+        "storage_url": "http://dashboard.metrixware.local:8090",
+        "metric_url": "http://dashboard.metrixware.local:8092/",
+        "username": "sleroy",
+        "password": ""
+    },
+
+}
