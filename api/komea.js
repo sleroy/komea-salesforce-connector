@@ -3,7 +3,9 @@ const logger = require('winston');
 const url = require('url');
 const chai = require('chai');
 const util = require('util');
+
 const rest = require('./rest');
+const Metric = require('./metric');
 
 const expect = chai.expect;
 
@@ -25,18 +27,37 @@ function Komea(komeaConfig) {
     this.config = komeaConfig;
 }
 
+
+
 /**
- * Returns the Komea URL.
+ * Returns the rest auth.
+ */
+Komea.prototype.auth = function() {
+    return {
+        user: this.config.login,
+        pass: this.config.password,
+        sendImmediately: true
+    };
+}
+
+/**
+ * Returns an API Url from the metric service.
  * @param relativePath the relative path to access on Komea server.
  */
-Komea.prototype.komeaPath = function(relativePath) {
+Komea.prototype.metricService = function(relativePath) {
     expect(relativePath).to.not.be.undefined;
-    const protocol = this.config.https ? 'https' : 'http';
-    const portStr = (this.config.port != undefined ? (":" + this.config.port) : "");
-    const komeaHost = protocol + '://' + this.config.host + portStr + relativePath;
-    logger.debug("Komea host %s", komeaHost);
-    return komeaHost;
+    return this.config.metric_url + relativePath;
 }
+
+/**
+ * Returns an API Url from the metric service.
+ * @param relativePath the relative path to access on Komea server.
+ */
+Komea.prototype.timeStorageService = function(relativePath) {
+    expect(relativePath).to.not.be.undefined;
+    return this.config.storage_url + relativePath;
+}
+
 
 /**
  * Provides the default common headers.
@@ -47,57 +68,60 @@ Komea.prototype.commonHeaders = function() {
     };
 }
 
-
 /**
- * Attempt to validate the authentication. No answer is provided.
+ * Creates a new metric object.
  */
-Komea.prototype.fast_authenticate = function(action) {
-    const komeaPath = this.komeaPath('');
-    const komeaConf = this.config;
-    this.authenticate(action, function()  {
-        throw new Error(util.format("Could not be authenticated on %s with configuration : %j " , komeaPath,  komeaConf));
-    });
+Komea.prototype.newMetric = function() {
+    return new Metric();
 }
 
+
 /**
- * Try to authenticate on Komea Dashboard
+ * Updates a metric.
+ * @param metric : takes a Metric object
  * @param action : the callback to be invoked when the rest call answer
  * @param error_cb : callback to handle errors.
  */
-Komea.prototype.authenticate = function(action, error_cb) {
-    const url = this.komeaPath("/api/authentication/login");
+Komea.prototype.updateMetric = function(metric, callback) {
+    const url = this.metricService("/metrics-storage/saveMetric");
     const requestHeaders = this.commonHeaders();
-    expect(action).to.not.be.undefined;
+    expect(callback).to.not.be.undefined;
 
+    // Get auth configuration
+    var authParams = this.auth();
 
     rest.prepare_rest_request();
     var request = unirest
         .post(url)
         .headers(requestHeaders)
         .type("application/json")
-        .query(
-          {
-            "login":  this.config.login,
-            "password": this.config.password
-          })
+        .auth(authParams)
+        .json(metric)
         .send()
         .end(function(response) {
-            logger.debug("Komea:authentication response received.");
-            handle_errors(response, action, error_cb);
+            rest.handle_errors(response, callback);
         });
 }
 
 /**
- * Creates a new metric object.
+ * Returns the list of metrics
  */
-Komea.prototype.newMetric = function(action, error_cb) {
-}
+Komea.prototype.getAllMetrics = function(callback) {
+    const url = this.metricService("/metrics-request/getAllMetrics");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
 
+    // Get auth configuration
+    var authParams = this.auth();
 
-/**
- * Updates a metric.
- * @param action : the callback to be invoked when the rest call answer
- * @param error_cb : callback to handle errors.
- */
-Komea.prototype.updateMetric = function(action, error_cb) {
+    rest.prepare_rest_request();
+    var request = unirest
+        .get(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .send()
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
 }

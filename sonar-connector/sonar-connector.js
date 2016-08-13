@@ -13,11 +13,11 @@ const sonarlib = require('../api/sonar.js');
 
 
 if (!config.has('sonar')) {
-    throw new Error("Informations to connect to the Sonar server must be defined into the configuration file");  //...
+    throw new Error("Informations to connect to the Sonar server must be defined into the configuration file"); //...
 }
 
 if (!config.has('komea')) {
-    throw new Error("Informations to connect to the Komea server must be defined into the configuration file");  //...
+    throw new Error("Informations to connect to the Komea server must be defined into the configuration file"); //...
 }
 
 //...
@@ -46,11 +46,11 @@ if (program.projectList) {
     const sonarClient = sonarlib.newSonarClient(sonarConfig);
 
     sonarClient.fast_authenticate(function() {
-        const projectList = sonarClient.list_projects(function(data, response)  {
+        const projectList = sonarClient.list_projects(function(err, data)  {
             logger.info("Listing the Sonar projects...")
             logger.info("-----------------------------------");
             if (response.error != undefined) {
-                for (let i = 0, ni = data.length; i < ni ; ++i) {
+                for (let i = 0, ni = data.length; i < ni; ++i) {
                     logger.info("Project %d->%s (%s)", data[i].id, data[i].nm, data[i].k);
                 }
             }
@@ -64,16 +64,15 @@ if (program.metricList) {
     const sonarClient = sonarlib.newSonarClient(sonarConfig);
 
     sonarClient.fast_authenticate(function() {
-        const projectList = sonarClient.list_metrics(function(data, response)  {
+        const projectList = sonarClient.list_metrics(function(err, data)  {
             logger.info("Listing the Sonar metrics...");
             logger.info("-----------------------------------");
-            if (response.error != undefined) {
-                const metrics = data.metrics;
-                for (let i = 0, ni = metrics.length; i < ni ; ++i) {
-                    //logger.info("%j", metrics[i]);
-                    logger.info("Metric %s (%s)", metrics[i].name, metrics[i].key);
-                }
+            const metrics = data.metrics;
+            for (let i = 0, ni = metrics.length; i < ni; ++i) {
+                //logger.info("%j", metrics[i]);
+                logger.info("Metric %s (%s)", metrics[i].name, metrics[i].key);
             }
+
             logger.info("-----------------------------------");
         });
     });
@@ -84,20 +83,34 @@ if (program.updateMetrics) {
     const komeaClient = komealib.newKomeaClient(komeaConfig);
 
     sonarClient.fast_authenticate(function() {
-        const projectList = sonarClient.list_metrics(function(data, response)  {
+        const projectList = sonarClient.list_metrics(function(err, data)  {
             logger.info("Updating Komea metrics");
             logger.info("-----------------------------------");
-            if (response.error != undefined) {
-                const metrics = data.metrics;
-                for (let i = 0, ni = metrics.length; i < ni ; ++i) {
-                    //logger.info("%j", metrics[i]);
-                    logger.info("Updating metric -> %s (%s)...", metrics[i].name, metrics[i].key);
+            const metrics = data.metrics;
 
-                    let metric = komeaClient.newMetric();
-                    // metrics[i]
-                    komeaClient.updateMetric(metric);
-                }
-            }
+            async.forEach(metrics, function(sonarMetric, next) {
+
+
+                let metric = komeaClient.newMetric();
+                metric.name = sonarMetric.name;
+                metric.key = sonarMetric.key;
+                metric.description = sonarMetric.name;
+                metric.lastValue();
+                metric.formula = ""; // No Formula
+                metric.oncePerDay();
+                metric.missingValueStrategy = "NULL_VALUE";
+                metric.type = "SonarQube";
+                metric.units = "Undefined";
+                metric.valueDirection = "1";
+                metric.valueType = "FLOAT";
+                
+                komeaClient.updateMetric(metric, function(err, data) {
+                    if (err) next(err);
+                    logger.info("----> [OK] UPDATED %s", metric.name);
+                    next();
+                });
+            });
+
             logger.info("-----------------------------------");
         });
     });

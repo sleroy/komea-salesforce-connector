@@ -57,7 +57,7 @@ Sonar.prototype.commonHeaders = function() {
 /**
  * Attempt to validate the authentication
  */
-Sonar.prototype.validate_authentication = function(action, error_cb) {
+Sonar.prototype.validate_authentication = function(callback) {
     const url = this.sonarPath('/api/authentication/validate');
     const requestHeaders = this.commonHeaders();
 
@@ -70,7 +70,7 @@ Sonar.prototype.validate_authentication = function(action, error_cb) {
             .send()
             .end(function(response) {
                 logger.debug("Sonar:authentication done");
-                rest.handle_errors(response, action, error_cb);
+                rest.handle_errors(response, callback);
             });
     });
 }
@@ -83,7 +83,7 @@ Sonar.prototype.fast_authenticate = function(action) {
     const sonarPath = this.sonarPath('');
     const sonarConf = this.config;
     this.authenticate(action, function()  {
-        throw new Error(util.format("Could not be authenticated on %s with configuration : %j " , sonarPath,  sonarConf));
+        throw new Error(util.format("Could not be authenticated on %s with configuration : %j ", sonarPath, sonarConf));
     });
 }
 
@@ -91,10 +91,10 @@ Sonar.prototype.fast_authenticate = function(action) {
  * Try to authenticate on Sonar
  * @param action : the callback to be invoked when the rest call answer
  */
-Sonar.prototype.authenticate = function(action, error_cb) {
+Sonar.prototype.authenticate = function(callback) {
     const url = this.sonarPath("/api/authentication/login");
     const requestHeaders = this.commonHeaders();
-    expect(action).to.not.be.undefined;
+    expect(callback).to.not.be.undefined;
 
 
     rest.prepare_rest_request();
@@ -102,15 +102,14 @@ Sonar.prototype.authenticate = function(action, error_cb) {
         .post(url)
         .headers(requestHeaders)
         .type("application/json")
-        .query(
-          {
-            "login":  this.config.login,
+        .query({
+            "login": this.config.login,
             "password": this.config.password
-          })
+        })
         .send()
         .end(function(response) {
             logger.debug("Sonar:authentication response received.");
-            rest.handle_errors(response, action, error_cb);
+            rest.handle_errors(response, callback);
         });
 }
 
@@ -119,10 +118,10 @@ Sonar.prototype.authenticate = function(action, error_cb) {
  * List the projects inside Sonar
  * @param action : the callback to be invoked when the rest call answer
  */
-Sonar.prototype.list_projects = function(action, error_cb) {
+Sonar.prototype.list_projects = function(callback) {
     const url = this.sonarPath("/api/projects/index");
     const requestHeaders = this.commonHeaders();
-    expect(action).to.not.be.undefined;
+    expect(callback).to.not.be.undefined;
 
     rest.prepare_rest_request();
     var request = unirest
@@ -132,19 +131,19 @@ Sonar.prototype.list_projects = function(action, error_cb) {
         .send()
         .end(function(response) {
             logger.debug("Sonar:projectList obtained.");
-            rest.handle_errors(response, action, error_cb);
+            rest.handle_errors(response, callback);
         });
 }
 
 
 /**
  * List the projects inside Sonar
- * @param action : the callback to be invoked when the rest call answer
+ * @param callback :An optional callback to run once all the functions have completed. This function gets a results array (or object) containing all the result arguments passed to the task callbacks. Invoked with (err, result).
  */
-Sonar.prototype.list_metrics = function(action, error_cb) {
+Sonar.prototype.list_metrics = function(callback) {
     const url = this.sonarPath("/api/metrics/search");
     const requestHeaders = this.commonHeaders();
-    expect(action).to.not.be.undefined;
+    expect(callback).to.not.be.undefined;
 
     rest.prepare_rest_request();
     var request = unirest
@@ -154,6 +153,6 @@ Sonar.prototype.list_metrics = function(action, error_cb) {
         .send()
         .end(function(response) {
             logger.debug("Sonar:metricList obtained.");
-            rest.handle_errors(response, action, error_cb);
+            rest.handle_errors(response, callback);
         });
 }

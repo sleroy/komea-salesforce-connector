@@ -10,8 +10,8 @@
     "komea": {
         "storage_url": "http://dashboard.metrixware.local:8090",
         "metric_url": "http://dashboard.metrixware.local:8092/",
-        "username": "sleroy",
-        "password": ""
+        "login": "sleroy",
+        "password": "pN9wQttVdY"
     },
 
 }

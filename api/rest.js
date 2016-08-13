@@ -7,26 +7,27 @@ const expect = chai.expect;
 
 
 // Generic method to handle REST errors.
-exports.handle_errors = function(response, action, error_cb) {
-    expect(action).to.not.be.undefined;
+exports.handle_errors = function(response, callback) {
+    expect(callback).to.not.be.undefined;
     //expect(error_cb).to.not.be.undefined;
-    logger.debug("Response %j", response);
+
     if (!response.ok) {
         logger.error("Error happened during the execution of a request");
         logger.error("Error message " + response.error);
-        if (error_cb != undefined) {
-          error_cb(response);
-        } else {
-          logger.debug("No error treatment provided.");
-        }
+        logger.error("Response Body----");
+        logger.error("Response %j", response.body);
+
+        throw new Error("Error message " + response.error);
+
+        //callback(response, null);
     } else {
-        action(response.body, response);
+        callback(null, response.body);
     }
 }
 
 /**
  * This function do some work to prepare a REST request.
  */
-exports.prepare_rest_request = function () {
+exports.prepare_rest_request = function() {
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'; // Ignore SSL problems
 }
