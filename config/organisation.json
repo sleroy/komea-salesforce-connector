@@ -1,0 +1,13 @@
+{
+    "entityTypes": [{
+        "description": "Sonar Project description",
+        "key": "sonar-project",
+        "active": true,
+        "name": "Sonar Project",
+        "searchableFields": [
+            "key",
+            "name",
+            "id"
+        ]
+    }]
+}

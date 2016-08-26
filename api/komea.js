@@ -50,12 +50,21 @@ Komea.prototype.metricService = function(relativePath) {
 }
 
 /**
- * Returns an API Url from the metric service.
+ * Returns an API Url from the timestorage service.
  * @param relativePath the relative path to access on Komea server.
  */
 Komea.prototype.timeStorageService = function(relativePath) {
     expect(relativePath).to.not.be.undefined;
     return this.config.storage_url + relativePath;
+}
+
+/**
+ * Returns an API Url from the organization service.
+ * @param relativePath the relative path to access on Komea server.
+ */
+Komea.prototype.organizationService = function(relativePath) {
+    expect(relativePath).to.not.be.undefined;
+    return this.config.organization_url + relativePath;
 }
 
 
@@ -73,6 +82,62 @@ Komea.prototype.commonHeaders = function() {
  */
 Komea.prototype.newMetric = function() {
     return new Metric();
+}
+
+/**
+ * Updates an entity type.
+ * @param entitType : takes an entity type.
+ * @param action : the callback to be invoked when the rest call answer
+ * @param error_cb : callback to handle errors.
+ */
+Komea.prototype.updateEntityTypes = function(entityTypes, callback) {
+    const url = this.organizationService("/organization-storage/addOrUpdatePartialEntityTypes");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+    expect(entityTypes).to.not.be.undefined;
+
+    // Get auth configuration
+    var authParams = this.auth();
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .post(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .json(entityTypes)
+        .send()
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
+}
+
+/**
+ * Updates an Entity.
+ * @param entity takes an entity.
+ * @param action : the callback to be invoked when the rest call answer
+ * @param error_cb : callback to handle errors.
+ */
+Komea.prototype.updateEntity = function(entity, callback) {
+    const url = this.organizationService("/organization-storage/addOrUpdateCompleteEntities");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+    expect(entity).to.not.be.undefined;
+
+    // Get auth configuration
+    var authParams = this.auth();
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .post(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .json([entity])
+        .send()
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
 }
 
 
@@ -103,8 +168,9 @@ Komea.prototype.updateMetric = function(metric, callback) {
         });
 }
 
+
 /**
- * Returns the list of metrics
+ * Deletes a list of metrics
  */
 Komea.prototype.getAllMetrics = function(callback) {
     const url = this.metricService("/metrics-request/getAllMetrics");
@@ -121,6 +187,88 @@ Komea.prototype.getAllMetrics = function(callback) {
         .type("application/json")
         .auth(authParams)
         .send()
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
+}
+
+/**
+ * Returns the list of metrics
+ */
+Komea.prototype.deleteMetrics = function(metricList, callback) {
+    const url = this.metricService("/metrics-storage/deleteMetricsAndTimeseries");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+    // Get auth configuration
+    var authParams = this.auth();
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .post(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .send(metricList)
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
+}
+
+/**
+ * Returns the list of metrics
+ */
+Komea.prototype.deleteTimeSeries = function(metricList, callback) {
+    const url = this.metricService("/timeseries-storage/deleteTimeSeriesByQuery");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+
+
+
+    // Get auth configuration
+    var authParams = this.auth();
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .post(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .send(metricList)
+        .end(function(response) {
+
+            rest.handle_errors(response, callback);
+        });
+}
+
+
+
+/**
+ * Deletes a list of metrics
+ */
+Komea.prototype.push_timeserie = function(date, metricKey, tags, value, callback) {
+    //logger.info("date %s, metric %s, tags %j, value = %d", date, metricKey, tags, value);
+    //return ;
+    const url = this.timeStorageService("/timeseries-storage/pushTimeSeries");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+
+    // Get auth configuration
+    var authParams = this.auth();
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .post(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .auth(authParams)
+        .send([{
+            'metricKey': metricKey,
+            'tags': tags,
+            'measures': [{
+                'date': date,
+                'value': value
+            }]
+        }])
         .end(function(response) {
             rest.handle_errors(response, callback);
         });

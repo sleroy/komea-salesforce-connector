@@ -17,9 +17,10 @@ exports.handle_errors = function(response, callback) {
         logger.error("Response Body----");
         logger.error("Response %j", response.body);
 
+        callback(response.error, null);
         throw new Error("Error message " + response.error);
 
-        //callback(response, null);
+
     } else {
         callback(null, response.body);
     }

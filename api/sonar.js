@@ -32,6 +32,11 @@ function Sonar(sonarConfig) {
     this.config = sonarConfig;
 }
 
+// Returns the metric key.
+Sonar.prototype.getMetricKey= function(metricKey) {
+    return "sonar-" + metric.key;
+}
+
 /**
  * Returns the Sonar URL.
  * @param relativePath the relative path to access on Sonar server.
@@ -113,6 +118,34 @@ Sonar.prototype.authenticate = function(callback) {
         });
 }
 
+
+
+
+
+/**
+ * Get measures of a component.
+ */
+Sonar.prototype.measures_component = function(componentID, metricKeys, callback) {
+    const url = this.sonarPath("/api/measures/component");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+    expect(componentID).to.not.be.undefined;
+
+    rest.prepare_rest_request();
+    var request = unirest
+        .get(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .send()
+        .query({
+            'componentKey' : componentID,
+            'metricKeys' : metricKeys
+        })
+        .end(function(response) {
+            logger.debug("Sonar:measures obtained.");
+            rest.handle_errors(response, callback);
+        });
+}
 
 /**
  * List the projects inside Sonar
