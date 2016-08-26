@@ -174,7 +174,7 @@ Sonar.prototype.list_projects = function(callback) {
  * @param callback :An optional callback to run once all the functions have completed. This function gets a results array (or object) containing all the result arguments passed to the task callbacks. Invoked with (err, result).
  */
 Sonar.prototype.list_metrics = function(callback) {
-    const url = this.sonarPath("/api/metrics/search");
+    const url = this.sonarPath("/api/metrics/search?ps=500");
     const requestHeaders = this.commonHeaders();
     expect(callback).to.not.be.undefined;
 

@@ -178,14 +178,14 @@ if (program.updateMetrics) {
 
             // Filter metrics
             let filteredMetrics = l.filter(metrics, function(sonarMetric) {
-                if ('DATA' == sonarMetric.type ||  'DISTRIB' == sonarMetric.type) {
+                if ('DATA' == sonarMetric.type ||  'DISTRIB' == sonarMetric.type ||  'LEVEL' == sonarMetric.type ||  'STRING' == sonarMetric.type) {
                     logger.warn("Ignoring metric %s since she returns %s", sonarMetric.name, sonarMetric.type);
                     return false;
                 } else {
                     return true;
                 }
             });
-
+            logger.info("List of metrics %j", filteredMetrics);
             async.forEach(filteredMetrics, function(sonarMetric, next) {
                 const metric = buildKomeaMetric(sonarMetric);
 
@@ -250,8 +250,8 @@ if (program.push) {
                                 } else {
                                     //logger.info("Metric data %s", JSON.stringify(measureData));
                                     let tags = {
-                                        "sonar_key": project.k,
-                                        "sonar_id": project.id
+                                        "sonar-project_key": project.k,
+                                        "sonar-project_id": project.id
                                     };
                                     //logger.info("Tags %j", tags);
                                     var componentMeasure = measureData.component;
