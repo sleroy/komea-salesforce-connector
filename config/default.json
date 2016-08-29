@@ -4,7 +4,7 @@
         "port": 9000,
         "https": false,
         "login" : "admin",
-        "password": "admin",
+        "password": "admin"
     },
     "komea": {
         "storage_url": "http://dashboard.metrixware.local:8081/api/dashboard/timeseries",
@@ -15,6 +15,6 @@
         "activemq_login" : "admin",
         "activemq_password" : "admin"
 
-    },
+    }
 
 }

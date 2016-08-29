@@ -33,7 +33,7 @@ function Sonar(sonarConfig) {
 }
 
 // Returns the metric key.
-Sonar.prototype.getMetricKey= function(metricKey) {
+Sonar.prototype.getMetricKey= function(metric) {
     return "sonar-" + metric.key;
 }
 
