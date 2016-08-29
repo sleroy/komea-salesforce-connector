@@ -18,6 +18,11 @@ L'api http://jsforce.github.io
 Pour la description du fonctionnement des fichiers de configuration : 
 
 https://github.com/lorenwest/node-config/wiki/
+ 
+## Pour lancer le connecteur Sonar
 
+Modifier la configuration dans config/default.json.
+
+Lancer node sonar-connector/sonar-connector.js
 
 
