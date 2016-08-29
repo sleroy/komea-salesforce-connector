@@ -1,0 +1,12 @@
+{
+    "entityTypes": [{
+        "description": "Product lines",
+        "key": "productline",
+        "active": true,
+        "name": "Product line",
+        "searchableFields": [
+            "key",
+            "name"
+        ]
+    }]
+}

@@ -1,5 +1,4 @@
 {
-    // Sonar REST connection configuration
     "sonar": {
         "host": "zeus.tocea.local",
         "port": 9000,
@@ -12,9 +11,9 @@
         "metric_url": "http://dashboard.metrixware.local:8081/api/dashboard/kpis",
         "organization_url": "http://dashboard.metrixware.local:8081/api/dashboard/organization",
         "login": "sleroy",
-        "password": "pN9wQttVdY",
-        "activemq_login" : 'admin',
-        "activemq_password" : 'admin'
+        "password": "password",
+        "activemq_login" : "admin",
+        "activemq_password" : "admin"
 
     },
 
