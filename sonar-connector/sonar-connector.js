@@ -171,12 +171,14 @@ if (program.updateMetrics) {
     }
 
     sonarClient.fast_authenticate(function() {
+        logger.info("Obtaining metrics...");
         const projectList = sonarClient.list_metrics(function(err, data)  {
             logger.info("Updating Komea metrics");
             logger.info("-----------------------------------");
             let metrics = data.metrics;
 
             // Filter metrics
+            logger.info("Filtering metrics...");
             let filteredMetrics = l.filter(metrics, function(sonarMetric) {
                 if ('DATA' == sonarMetric.type ||  'DISTRIB' == sonarMetric.type ||  'LEVEL' == sonarMetric.type ||  'STRING' == sonarMetric.type) {
                     logger.warn("Ignoring metric %s since she returns %s", sonarMetric.name, sonarMetric.type);
@@ -207,15 +209,17 @@ if (program.updateMetrics) {
 }
 
 if (program.push) {
-    sonarClient.fast_authenticate(function() {
+        sonarClient.fast_authenticate(function() {
         logger.info("Pushing the measures to Komea...");
         sonarClient.list_projects(function(projectErr, projectData)  {
+            logger.info("Sonar: list projects received");
             if (projectErr) {
                 logger.error("Could not obtain the project list.");
                 next(err);
                 return;
             }
             sonarClient.list_metrics(function(metricErr, metricData)  {
+                logger.info("Sonar: list metrics received.");
                 if (metricErr) {
                     next(metricErr);
                     ermetricErrrermetricErrr
@@ -227,7 +231,7 @@ if (program.push) {
                 logger.info("Updating Komea metrics");
                 logger.info("-----------------------------------");
                 let metrics = metricData.metrics;
-
+                logger.info("Filtering metrics.");
                 // Filter metrics
                 let filteredMetrics = l.filter(metrics, function(sonarMetric) {
                     if ('DATA' == sonarMetric.type ||  'DISTRIB' == sonarMetric.type) {
@@ -240,9 +244,11 @@ if (program.push) {
 
 
                 async.forEach(filteredMetrics, function(sonarMetric, next) {
+                        logger.info("Obtaining measures for %s", sonarMetric.name);
                         for (let i = 0, ni = projectData.length; i < ni; ++i) {
                             let project = projectData[i];
                             sonarClient.measures_component(project.k, [sonarMetric.key], function(err, measureData) {
+                                logger.info("Measures for %s received.", sonarMetric.name);
                                 if (err) {
                                     logger.error("Problem with the metric  %j and project %j", sonarMetric.name, project);
                                     next(err);
@@ -255,11 +261,13 @@ if (program.push) {
                                     };
                                     //logger.info("Tags %j", tags);
                                     var componentMeasure = measureData.component;
+                                    logger.info("Sending measures for %s", sonarMetric.key);
                                     for (var mi = 0; mi < componentMeasure.measures.length; ++mi) {;
                                         var measure = componentMeasure.measures[mi]; // We have only one component
-
+                                        logger.info("Sending measures %s for %s", measure.metric, sonarMetric.key);
                                         komeaClient.push_timeserie(new Date(), "sonar-" + measure.metric, tags, measure.value, function() {
                                             if (err) {
+                                                logger.error("ERROR with timeserie %j", measure);
                                                 next(err);
                                             } else {
                                                 logger.info("----> [OK] Measure %s for project %s sent", sonarMetric.name, project.nm);

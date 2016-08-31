@@ -87,6 +87,7 @@ Sonar.prototype.validate_authentication = function(callback) {
 Sonar.prototype.fast_authenticate = function(action) {
     const sonarPath = this.sonarPath('');
     const sonarConf = this.config;
+    logger.info("Sonar authentication...");
     this.authenticate(action, function()  {
         throw new Error(util.format("Could not be authenticated on %s with configuration : %j ", sonarPath, sonarConf));
     });
@@ -152,6 +153,7 @@ Sonar.prototype.measures_component = function(componentID, metricKeys, callback)
  * @param action : the callback to be invoked when the rest call answer
  */
 Sonar.prototype.list_projects = function(callback) {
+    logger.info("Sonar: list projects");
     const url = this.sonarPath("/api/projects/index");
     const requestHeaders = this.commonHeaders();
     expect(callback).to.not.be.undefined;
@@ -174,6 +176,7 @@ Sonar.prototype.list_projects = function(callback) {
  * @param callback :An optional callback to run once all the functions have completed. This function gets a results array (or object) containing all the result arguments passed to the task callbacks. Invoked with (err, result).
  */
 Sonar.prototype.list_metrics = function(callback) {
+    logger.info("Sonar: list metrics");
     const url = this.sonarPath("/api/metrics/search?ps=500");
     const requestHeaders = this.commonHeaders();
     expect(callback).to.not.be.undefined;
