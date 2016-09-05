@@ -9,6 +9,15 @@ const Metric = require('./metric');
 
 const expect = chai.expect;
 
+var valueFormatter = function(rawValue) {
+  if (rawValue) {
+    value = parseFloat(rawValue);
+    if (!isNaN(value)) {
+      return value;
+    }
+  }
+  return null;
+}
 
 /**
  * Factory method to create a new Komea client.
@@ -245,9 +254,17 @@ Komea.prototype.deleteTimeSeries = function(metricList, callback) {
 /**
  * Deletes a list of metrics
  */
-Komea.prototype.push_timeserie = function(date, metricKey, tags, value, callback) {
-    //logger.info("date %s, metric %s, tags %j, value = %d", date, metricKey, tags, value);
-    //return ;
+Komea.prototype.push_timeserie = function(date, metricKey, tags, rawValue, callback) {
+
+    // Formatting value
+    value = valueFormatter(rawValue);
+
+    // Abort if the value is not valid
+    if (value == null) {
+        logger.error("Trying to send incorrect timeserie with metricKey "+metricKey+"(value="+rawValue+"). Aborting.");
+        return;
+    }
+
     const url = this.timeStorageService("/timeseries-storage/pushTimeSeries");
     const requestHeaders = this.commonHeaders();
     expect(callback).to.not.be.undefined;
