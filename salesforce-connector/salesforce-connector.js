@@ -56,9 +56,10 @@ if (program.test) {
                 return console.error(err);
             }
             console.log("reports length: " + reports.length);
+            //console.log("Report %j", reports);
             for (var i = 0; i < reports.length; i++) {
-                console.log(reports[i].id);
-                console.log(reports[i].name);
+                console.log("Id %s",  reports[i].id);
+                console.log("Name %s", reports[i].name);
             }
         });
         // get report reference
@@ -70,6 +71,8 @@ if (program.test) {
             if (err) {
                 return console.error("Cannot obtain the report " + err);
             }
+            console.log("Execution result %j", result);
+            console.log("Execution error %j", err);
             console.log(result.reportMetadata);
             console.log(result.factMap);
             // ...
