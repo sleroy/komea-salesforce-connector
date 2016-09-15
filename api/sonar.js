@@ -172,16 +172,45 @@ Sonar.prototype.list_projects = function(callback) {
 
 
 /**
- * List the projects inside Sonar
+ * List the components of a project.
+ * @param action : the callback to be invoked when the rest call answer
+ */
+Sonar.prototype.list_components = function(componentKey,componentType, callback, page) {
+    logger.info("Sonar: list components");
+    const url = this.sonarPath("/api/components/tree?ps=500");
+    const requestHeaders = this.commonHeaders();
+    expect(callback).to.not.be.undefined;
+    var curPage = page == undefined ? 1 : page;
+    rest.prepare_rest_request();
+    var request = unirest
+        .get(url)
+        .headers(requestHeaders)
+        .type("application/json")
+        .query({
+            'baseComponentKey' : componentKey,
+            'qualifiers' :componentType,
+            'p' : curPage
+        })
+        .send()
+        .end(function(response) {
+            rest.handle_errors(response, callback);
+        });
+}
+
+
+
+/**
+ * List the metrics of SonarQube.
  * @param callback :An optional callback to run once all the functions have completed. This function gets a results array (or object) containing all the result arguments passed to the task callbacks. Invoked with (err, result).
  */
-Sonar.prototype.list_metrics = function(callback) {
+Sonar.prototype.list_metrics = function( callback) {
     logger.info("Sonar: list metrics");
     const url = this.sonarPath("/api/metrics/search?ps=500");
     const requestHeaders = this.commonHeaders();
     expect(callback).to.not.be.undefined;
 
     rest.prepare_rest_request();
+
     var request = unirest
         .get(url)
         .headers(requestHeaders)

@@ -31,6 +31,7 @@ program
     .option('-p, --push', 'Push the measures to Komea')
     .option('-u, --update-metrics', 'Updates the metrics in Komea')
     .option('-o, --update-organization', 'Updates the organization in Komea')
+    .option('-c, --generate-csv', 'Generates a CSV for the metrics')
     .parse(process.argv);
 
 
@@ -209,7 +210,7 @@ if (program.updateMetrics) {
 }
 
 if (program.push) {
-        sonarClient.fast_authenticate(function() {
+    sonarClient.fast_authenticate(function() {
         logger.info("Pushing the measures to Komea...");
         sonarClient.list_projects(function(projectErr, projectData)  {
             logger.info("Sonar: list projects received");
@@ -287,6 +288,121 @@ if (program.push) {
             });
 
         });
+    });
+
+}
+
+if (program.generateCsv) {
+
+    function generateCSV(component, filteredMetrics, stream) {
+        var stream0 = stream;
+
+        async.forEach(filteredMetrics, function(sonarMetric, next) {
+            //                logger.info("Obtaining measures for %s", sonarMetric.name);
+
+            logger.info("Component to be exported %s", component);
+
+            sonarClient.measures_component(component.key, [sonarMetric.key], function(err, measureData) {
+                //logger.info("Measures for %s received.", sonarMetric.name);
+                if (err) {
+                    logger.error("Problem with the metric  %j and component %j", sonarMetric.name, component);
+                    next(err);
+                    return;
+                } else {
+                    //logger.info("Measure %j", JSON.stringify(measureData));
+                    var componentMeasure = measureData.component;
+
+                    for (var mi = 0; mi < componentMeasure.measures.length; ++mi) {;
+                        var measure = componentMeasure.measures[mi]; // We have only one component
+                        for (var key in component) {
+                            stream.write(component[key] + ";");
+                        }
+                        stream.write( measure.metric + ";" + measure.value + "\n");
+
+                    }
+                }
+            });
+        }, function() {
+            stream0.end();
+
+        });
+
+    }
+
+    sonarClient.fast_authenticate(function() {
+        sonarClient.list_metrics(function(metricErr, metricData)  {
+            logger.info("Sonar: list metrics received.");
+            if (metricErr) {
+                next(metricErr);
+                ermetricErrrermetricErrr
+                return;
+            }
+
+
+
+            logger.info("Updating Komea metrics");
+            logger.info("-----------------------------------");
+            let metrics = metricData.metrics;
+            logger.info("Filtering metrics.");
+            // Filter metrics
+            let filteredMetrics = l.filter(metrics, function(sonarMetric) {
+                if ('DATA' == sonarMetric.type ||  'DISTRIB' == sonarMetric.type) {
+                    logger.warn("Ignoring metric %s since she returns %s", sonarMetric.name, sonarMetric.type);
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            logger.info("Generation of the csv..");
+
+            let project = {
+                "key": sonarConfig['default-sonar-project']
+            }
+
+
+            var fs = require('fs');
+
+            var stream = fs.createWriteStream("project_metrics.csv");
+            stream.once('open', function(fd) {
+                generateCSV(project, filteredMetrics, stream);
+            });
+
+            var curPage = 1;
+
+            var stream2 = fs.createWriteStream("metrics.csv");
+            stream2.once('open', function(fd) {
+
+                var callback = function(err, data) {
+                    logger.info("Received data %j", data);
+                    if (data.components.length > 0) {
+
+                        for (var c = 0; c < data.components.length; ++c) {
+                            logger.info("Component %j", data.components[c]);
+                            generateCSV(data.components[c], filteredMetrics, stream2);
+                        }
+
+                        sonarClient.list_components(
+                            sonarConfig['default-sonar-project'],
+                            "FIL",
+                            callback,
+                            curPage + 1
+                        );
+                    }
+                };
+
+                sonarClient.list_components(
+                    sonarConfig['default-sonar-project'],
+                    "FIL",
+                    callback,
+                    curPage
+                );
+
+            });
+
+            logger.info("-----------------------------------");
+        });
+
     });
 
 }

@@ -1,10 +1,11 @@
 {
     "sonar": {
-        "host": "zeus.tocea.local",
+        "host": "localhost",
         "port": 9000,
         "https": false,
         "login" : "admin",
-        "password": "admin"
+        "password": "admin",
+        "default-sonar-project" : "komea-salesforce-connector"
     },
     "komea": {
         "storage_url": "http://dashboard.metrixware.local:8081/api/dashboard/timeseries",
