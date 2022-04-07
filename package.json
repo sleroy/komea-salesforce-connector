@@ -20,7 +20,7 @@
   "author": "Sylvain Leroy",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.0.1",
+    "async": "^3.2.2",
     "chai": "^3.5.0",
     "commander": "^2.9.0",
     "config": "^1.21.0",
@@ -28,6 +28,6 @@
     "lodash": "^4.15.0",
     "unirest": "^0.5.0",
     "util": "^0.10.3",
-    "winston": "^2.2.0"
+    "winston": "^3.3.0"
   }
 }
